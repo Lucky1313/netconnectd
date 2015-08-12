@@ -31,7 +31,7 @@ class Server(object):
             result.append(dict(ssid=cell.ssid, channel=cell.channel, address=cell.address, encrypted=cell.encrypted, signal=cell.signal if hasattr(cell, "signal") else None))
         return result
 
-    def __init__(self, server_address=None, wifi_if=None, wired_if=None, linkmon_enabled=True, linkmon_maxdown=3, linkmon_interval=10,
+    def __init__(self, server_address=None, cli='ifupdown', wifi_if=None, wired_if=None, linkmon_enabled=True, linkmon_maxdown=3, linkmon_interval=10,
                  ap_driver="nl80211", ap_ssid=None, ap_psk=None, ap_name='netconnectd_ap', ap_channel=3, ap_ip='10.250.250.1',
                  ap_network='10.250.250.0/24', ap_range=('10.250.250.100', '10.250.250.200'), ap_forwarding=False,
                  ap_domain=None, wifi_name='netconnect_wifi', wifi_free=False, wifi_kill=False, path_hostapd="/usr/sbin/hostapd",
@@ -43,9 +43,14 @@ class Server(object):
             self.logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_tb))
         sys.excepthook = exception_logger
 
+        self.cli = cli
+
         self.Hostapd = wifi.Hostapd.for_hostapd_and_confd(path_hostapd, path_hostapd_conf)
         self.Dnsmasq = wifi.Dnsmasq.for_dnsmasq_and_confd(path_dnsmasq, path_dnsmasq_conf)
-        self.Scheme = wifi.Scheme.for_file(path_interfaces)
+        if self.cli is 'netctl':
+            self.Scheme = wifi.NetctlScheme.for_file('/etc/netctl')
+        else:
+            self.Scheme = wifi.Scheme.for_file(path_interfaces)
         self.AccessPoint = wifi.AccessPoint.for_classes(
             hostapd_cls=self.Hostapd,
             dnsmasq_cls=self.Dnsmasq,
@@ -89,13 +94,19 @@ class Server(object):
 
         self.server_address = server_address
 
+        if self.cli is 'netctl':
+            scheme_options = dict(Connection=['hostapd'])
+        else:
+            scheme_options = None
+        
         # prepare access point configuration
         self.logger.debug("Creating access point object and resetting configuration")
         self.access_point = self.AccessPoint.for_arguments(self.wifi_if, self.ap_name,
                                                            ap_ssid, ap_channel, ap_ip, ap_network,
                                                            ap_range[0], ap_range[1], forwarding_to=wired_if if ap_forwarding else None,
                                                            hostap_options=dict(psk=ap_psk, driver=ap_driver),
-                                                           dnsmasq_options=dict(domain=ap_domain))
+                                                           dnsmasq_options=dict(domain=ap_domain),
+                                                           scheme_options=scheme_options)
         self.access_point.save(allow_overwrite=True)
         if self.access_point.is_running():
             self.logger.debug("Access point was running while starting up, disabling it")
@@ -675,6 +686,7 @@ def server():
     parser.add_argument("-q", "--quiet", action="store_true", help="Disable console output")
     parser.add_argument("-v", "--version", action="store_true", help="Display version information and exit")
     parser.add_argument("--logfile", default="/var/log/netconnectd.log", help="Location of logfile, defaults to /var/log/netconnectd.log")
+    parser.add_argument("--cli", help="CLI controller for network interfaces")
     parser.add_argument("--interface-wifi", help="Wifi interface")
     parser.add_argument("--interface-wired", help="Wired interface")
     parser.add_argument("--linkmon-disabled", action="store_true", help="Disable link monitor")
@@ -757,6 +769,9 @@ def server():
     if args.address:
         config["socket"] = args.address
 
+    if args.cli:
+        config["cli"] = args.cli
+        
     if args.interface_wifi:
         config["interfaces"]["wifi"] = args.interface_wifi
     if args.interface_wired:

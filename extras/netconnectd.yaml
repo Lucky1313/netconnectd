@@ -1,6 +1,9 @@
 # control socket to listen on
 #socket: /var/run/netconnectd.sock
 
+# cli network interface, currently either 'ifupdown' for Debian or 'netctl' for Arch
+#cli: ifupdown
+
 # wifi and wired interface
 interfaces:
   wifi: wlan0
