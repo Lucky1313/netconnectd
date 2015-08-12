@@ -30,8 +30,8 @@ EXTRAS_FOLDERS = [
 ]
 
 EXTRAS_FILES = [
-    ('/etc/init.d/', [('extras/netconnectd.init', 'netconnectd', 0755)]),
-    ('/etc/default/', [('extras/netconnectd.default', 'netconnectd', 0644)]),
+    #('/etc/init.d/', [('extras/netconnectd.init', 'netconnectd', 0755)]),
+    #('/etc/default/', [('extras/netconnectd.default', 'netconnectd', 0644)]),
     ('/etc/', [('extras/netconnectd.yaml', 'netconnectd.yaml', 0600)]),
     ('/etc/logrotate.d/', [('extras/netconnectd.logrotate', 'logrotate', 0644)]),
 ]
@@ -183,7 +183,7 @@ def params():
     zip_safe = False
 
     install_requires = [
-        "python-wifi",
+        "wifi==1.0.1",
         "PyYaml",
         "netaddr"
     ]

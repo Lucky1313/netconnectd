@@ -38,6 +38,7 @@ class InvalidConfig(Exception):
 
 default_config = dict(
     socket="/var/run/netconnectd.sock",
+    cli="ifupdown",
     interfaces=dict(
         wifi=None,
         wired=None

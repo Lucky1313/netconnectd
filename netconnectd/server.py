@@ -47,7 +47,7 @@ class Server(object):
 
         self.Hostapd = wifi.Hostapd.for_hostapd_and_confd(path_hostapd, path_hostapd_conf)
         self.Dnsmasq = wifi.Dnsmasq.for_dnsmasq_and_confd(path_dnsmasq, path_dnsmasq_conf)
-        if self.cli is 'netctl':
+        if self.cli == 'netctl':
             self.Scheme = wifi.NetctlScheme.for_file('/etc/netctl')
         else:
             self.Scheme = wifi.Scheme.for_file(path_interfaces)
@@ -94,7 +94,7 @@ class Server(object):
 
         self.server_address = server_address
 
-        if self.cli is 'netctl':
+        if self.cli == 'netctl':
             scheme_options = dict(Connection=['hostapd'])
         else:
             scheme_options = None
