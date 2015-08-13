@@ -1,0 +1,29 @@
+# Hostapd connection support for netctl
+
+hostapd_up() {
+    if ! is_interface "$Interface"; then
+        report_error "Interface '$Interface' does not exist"
+        return 1
+    fi
+
+    # Disable IPv6 before bringing the interface up to prevent SLAAC
+    if [[ $IP6 == "no" ]]; then
+        sysctl -q -w "net.ipv6.conf.${Interface/.//}.disable_ipv6=1"
+    fi
+
+    for addr in ${Address}; do
+        if ! do_debug ip addr add $addr brd + dev $Interface; then
+            return 1
+        fi
+    done
+}
+
+hostapd_down() {
+    for addr in ${Address}; do
+        if ! do_debug ip addr del $addr dev $Interface; then
+            return 1
+        fi
+    done
+}
+
+# vim: ft=sh ts=4 et sw=4:

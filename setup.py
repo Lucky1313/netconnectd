@@ -38,6 +38,7 @@ EXTRAS_FILES = [
 
 ARCH_FILES = [
     ('/usr/lib/systemd/system/', [('extras/netconnectd.service', 'netconnectd.service', 0755)]),
+    ('/usr/lib/network/connections/', [('extras/hostapd', 'hostapd', 644)]),
     ('/etc/', [('extras/netconnectd.yaml', 'netconnectd.yaml', 0600)]),
     ('/etc/logrotate.d/', [('extras/netconnectd.logrotate', 'logrotate', 0644)]),
 ]
