@@ -48,7 +48,7 @@ class Server(object):
         self.Hostapd = wifi.Hostapd.for_hostapd_and_confd(path_hostapd, path_hostapd_conf)
         self.Dnsmasq = wifi.Dnsmasq.for_dnsmasq_and_confd(path_dnsmasq, path_dnsmasq_conf)
         if self.cli == 'netctl':
-            self.Scheme = wifi.NetctlScheme.for_file('/etc/netctl')
+            self.Scheme = wifi.NetctlScheme.for_file('/etc/netctl/')
         else:
             self.Scheme = wifi.Scheme.for_file(path_interfaces)
         self.AccessPoint = wifi.AccessPoint.for_classes(
@@ -622,6 +622,7 @@ class Server(object):
 def start_server(config):
     kwargs = dict(
         server_address=config["socket"],
+        cli=config["cli"],
         wifi_if=config["interfaces"]["wifi"],
         wired_if=config["interfaces"]["wired"],
         linkmon_enabled=config["link_monitor"]["enabled"],
